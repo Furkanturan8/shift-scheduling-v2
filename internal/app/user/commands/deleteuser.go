@@ -29,12 +29,12 @@ func NewDeleteUserRequestHandler(
 
 // Handle Handlers the DeleteUserRequest request
 func (h deleteUserRequestHandler) Handle(ctx context.Context, command *dto.DeleteUserRequest) error {
-	user, err := h.repo.GetByID(command.UserID)
+	user, err := h.repo.GetByID(command.ID)
 	if user == nil {
 		return fmt.Errorf("the provided user id does not exist")
 	}
 	if err != nil {
 		return err
 	}
-	return h.repo.Delete(command.UserID)
+	return h.repo.Delete(command.ID)
 }

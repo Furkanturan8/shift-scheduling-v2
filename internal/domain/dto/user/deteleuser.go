@@ -2,7 +2,7 @@ package dto
 
 import "github.com/google/uuid"
 
-// DeleteUserRequest Command Model
+// DeleteUserRequest kullanıcı silme isteği için DTO
 type DeleteUserRequest struct {
-	UserID uuid.UUID `json:"id" validate:"required"`
+	ID uuid.UUID `json:"id" validate:"required"`
 }

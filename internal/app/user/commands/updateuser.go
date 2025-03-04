@@ -40,9 +40,11 @@ func (h updateUserRequestHandler) Handle(ctx context.Context, command *dto.Updat
 	}
 
 	user.Name = command.Name
-	user.Desc = command.Desc
-	user.Country = command.Country
+	user.Surname = command.Surname
+	user.UserName = command.UserName
+	user.Email = command.Email
+	user.Password = command.Password
+	user.Role = command.Role
 
 	return h.repo.Update(*user)
-
 }

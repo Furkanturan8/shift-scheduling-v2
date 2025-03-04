@@ -5,14 +5,17 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	dto "go-clean-architecture-example/internal/domain/dto/crag"
-	"go-clean-architecture-example/internal/domain/entities/crag"
-	"go-clean-architecture-example/internal/domain/entities/notification"
-	timeUtil "go-clean-architecture-example/pkg/time"
-	uuidUtil "go-clean-architecture-example/pkg/uuid"
+	dto "shift-scheduling-V2/internal/domain/dto/crag"
+	"shift-scheduling-V2/internal/domain/entities/crag"
+	"shift-scheduling-V2/internal/domain/entities/notification"
+
+	timeUtil "shift-scheduling-V2/pkg/time"
+	uuidUtil "shift-scheduling-V2/pkg/uuid"
 	"testing"
 	"time"
 )
+
+// todo: change the model (crag -> user)
 
 func TestAddCragCommandHandler_Handle(t *testing.T) {
 	mockTime, _ := time.Parse("yyyy-MM-02", "2021-07-30")

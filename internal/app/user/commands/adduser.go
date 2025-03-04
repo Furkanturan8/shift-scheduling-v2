@@ -40,8 +40,11 @@ func (h addUserRequestHandler) Handle(ctx context.Context, req *dto.AddUserReque
 	c := user.User{
 		ID:        h.uuidProvider.NewUUID(),
 		Name:      req.Name,
-		Desc:      req.Desc,
-		Country:   req.Country,
+		Surname:   req.Surname,
+		UserName:  req.UserName,
+		Email:     req.Email,
+		Password:  req.Password,
+		Role:      req.Role,
 		CreatedAt: h.timeProvider.Now(),
 	}
 	err := h.repo.Add(c)

@@ -11,6 +11,7 @@ import (
 	"testing"
 )
 
+// todo: change the model (crag -> user)
 func TestDeleteCragCommandHandler_Handle(t *testing.T) {
 	mockUUID := uuid.MustParse("3e204a57-4449-4c74-8227-77934cf25322")
 

@@ -6,20 +6,21 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	dto "go-clean-architecture-example/internal/domain/dto/crag"
-	"go-clean-architecture-example/internal/domain/entities/crag"
+	dto "shift-scheduling-V2/internal/domain/dto/user"
+
+	"shift-scheduling-V2/internal/domain/entities/user"
 	"testing"
 	"time"
 )
 
-func TestUpdateCragCommandHandler_Handle(t *testing.T) {
+func TestUpdateUserCommandHandler_Handle(t *testing.T) {
 	mockUUID := uuid.MustParse("3e204a57-4449-4c74-8227-77934cf25322")
 
 	type fields struct {
-		repo crag.Repository
+		repo user.Repository
 	}
 	type args struct {
-		command *dto.UpdateCragRequest
+		command *dto.UpdateUserRequest
 		ctx     context.Context
 	}
 	tests := []struct {
@@ -31,34 +32,40 @@ func TestUpdateCragCommandHandler_Handle(t *testing.T) {
 		{
 			name: "happy path - no errors - should return nil",
 			fields: fields{
-				repo: func() crag.MockRepository {
-					mp := crag.MockRepository{}
-					returnedCrag := crag.Crag{
+				repo: func() user.MockRepository {
+					mp := user.MockRepository{}
+					returnedUser := user.User{
 						ID:        mockUUID,
 						Name:      "initial",
-						Desc:      "initial",
-						Country:   "initial",
+						Surname:   "initial",
+						UserName:  "initial",
+						Email:     "initial",
+						Password:  "initial",
 						CreatedAt: time.Time{},
 					}
-					updatedCrag := crag.Crag{
+					updatedUser := user.User{
 						ID:        mockUUID,
 						Name:      "updated",
-						Desc:      "updated",
-						Country:   "updated",
+						Surname:   "updated",
+						UserName:  "updated",
+						Email:     "updated",
+						Password:  "updated",
 						CreatedAt: time.Time{},
 					}
-					mp.On("GetByID", mockUUID).Return(&returnedCrag, nil)
-					mp.On("Update", updatedCrag).Return(nil)
+					mp.On("GetByID", mockUUID).Return(&returnedUser, nil)
+					mp.On("Update", updatedUser).Return(nil)
 
 					return mp
 				}(),
 			},
 			args: args{
-				command: &dto.UpdateCragRequest{
-					ID:      mockUUID,
-					Name:    "updated",
-					Desc:    "updated",
-					Country: "updated",
+				command: &dto.UpdateUserRequest{
+					ID:       mockUUID,
+					Name:     "updated",
+					Surname:  "updated",
+					UserName: "updated",
+					Email:    "updated",
+					Password: "updated",
 				},
 				ctx: context.Background(),
 			},
@@ -67,19 +74,17 @@ func TestUpdateCragCommandHandler_Handle(t *testing.T) {
 		{
 			name: "get error should return error",
 			fields: fields{
-				repo: func() crag.MockRepository {
-					mp := crag.MockRepository{}
-					mp.On("GetByID", mockUUID).Return(&crag.Crag{ID: mockUUID}, errors.New("get error"))
+				repo: func() user.MockRepository {
+					mp := user.MockRepository{}
+					mp.On("GetByID", mockUUID).Return(&user.User{ID: mockUUID}, errors.New("get error"))
 
 					return mp
 				}(),
 			},
 			args: args{
-				command: &dto.UpdateCragRequest{
-					ID:      mockUUID,
-					Name:    "updated",
-					Desc:    "updated",
-					Country: "updated",
+				command: &dto.UpdateUserRequest{
+					ID:   mockUUID,
+					Name: "updated",
 				},
 				ctx: context.Background(),
 			},
@@ -88,18 +93,16 @@ func TestUpdateCragCommandHandler_Handle(t *testing.T) {
 		{
 			name: "get returns nil, should return error",
 			fields: fields{
-				repo: func() crag.MockRepository {
-					mp := crag.MockRepository{}
-					mp.On("GetByID", mockUUID).Return((*crag.Crag)(nil), nil)
+				repo: func() user.MockRepository {
+					mp := user.MockRepository{}
+					mp.On("GetByID", mockUUID).Return((*user.User)(nil), nil)
 					return mp
 				}(),
 			},
 			args: args{
-				command: &dto.UpdateCragRequest{
-					ID:      mockUUID,
-					Name:    "updated",
-					Desc:    "updated",
-					Country: "updated",
+				command: &dto.UpdateUserRequest{
+					ID:   mockUUID,
+					Name: "updated",
 				},
 				ctx: context.Background(),
 			},
@@ -108,34 +111,28 @@ func TestUpdateCragCommandHandler_Handle(t *testing.T) {
 		{
 			name: "update error - should return error",
 			fields: fields{
-				repo: func() crag.MockRepository {
-					mp := crag.MockRepository{}
-					returnedCrag := crag.Crag{
+				repo: func() user.MockRepository {
+					mp := user.MockRepository{}
+					returnedUser := user.User{
 						ID:        mockUUID,
 						Name:      "initial",
-						Desc:      "initial",
-						Country:   "initial",
 						CreatedAt: time.Time{},
 					}
-					updatedCrag := crag.Crag{
+					updatedUser := user.User{
 						ID:        mockUUID,
 						Name:      "updated",
-						Desc:      "updated",
-						Country:   "updated",
 						CreatedAt: time.Time{},
 					}
-					mp.On("GetByID", mockUUID).Return(&returnedCrag, nil)
-					mp.On("Update", updatedCrag).Return(errors.New("update error"))
+					mp.On("GetByID", mockUUID).Return(&returnedUser, nil)
+					mp.On("Update", updatedUser).Return(errors.New("update error"))
 
 					return mp
 				}(),
 			},
 			args: args{
-				command: &dto.UpdateCragRequest{
-					ID:      mockUUID,
-					Name:    "updated",
-					Desc:    "updated",
-					Country: "updated",
+				command: &dto.UpdateUserRequest{
+					ID:   mockUUID,
+					Name: "updated",
 				},
 				ctx: context.Background(),
 			},
@@ -144,7 +141,7 @@ func TestUpdateCragCommandHandler_Handle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := updateCragRequestHandler{
+			h := updateUserRequestHandler{
 				repo: tt.fields.repo,
 			}
 			err := h.Handle(tt.args.ctx, tt.args.command)

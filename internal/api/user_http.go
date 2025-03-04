@@ -72,7 +72,7 @@ func (cr *userHttpApi) GetUser(ctx *fiber.Ctx) error {
 // @Failure 400 {object} responses.General
 // @Router /User [get]
 func (cr *userHttpApi) GetUsers(ctx *fiber.Ctx) error {
-	Users, err := cr.userApp.Queries.GetAllUsersHandler.Handle(ctx.Context(), dto.GetAllUserRequest{})
+	Users, err := cr.userApp.Queries.GetAllUsersHandler.Handle(ctx.Context(), dto.GetAllUsersResponse{})
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (cr *userHttpApi) UpdateUser(ctx *fiber.Ctx) error {
 	}
 	req.ID = UserId
 
-	if err := cr.userApp.Commands.UpdateUserHandler.Handle(context, req); err != nil {
+	if err = cr.userApp.Commands.UpdateUserHandler.Handle(context, req); err != nil {
 		return err
 	}
 	return responses.DefaultSuccessResponse.JSON(ctx)
@@ -177,10 +177,10 @@ func (cr *userHttpApi) DeleteUser(ctx *fiber.Ctx) error {
 	}
 
 	req := &dto.DeleteUserRequest{
-		UserID: UserId,
+		ID: UserId,
 	}
 
-	if err := cr.userApp.Commands.DeleteUserHandler.Handle(context, req); err != nil {
+	if err = cr.userApp.Commands.DeleteUserHandler.Handle(context, req); err != nil {
 		return err
 	}
 	return responses.DefaultSuccessResponse.JSON(ctx)

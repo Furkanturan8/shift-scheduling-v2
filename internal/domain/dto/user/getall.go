@@ -2,15 +2,16 @@ package dto
 
 import (
 	"github.com/google/uuid"
-	"time"
+	"shift-scheduling-V2/internal/domain/entities/user"
 )
 
-// GetAllUsersResult is the result of the GetAllUsersRequest Query
-type GetAllUsersResult struct {
-	ID        uuid.UUID
-	Name      string
-	Desc      string
-	Country   string
-	CreatedAt time.Time
+// GetAllUsersResponse tüm kullanıcıları döndürmek için DTO
+type GetAllUsersResponse struct {
+	ID       uuid.UUID     `json:"id"`
+	Name     string        `json:"name"`
+	Surname  string        `json:"surname"`
+	UserName string        `json:"username"`
+	Email    string        `json:"email"`
+	Phone    string        `json:"phone"`
+	Role     user.UserRole `json:"role"`
 }
-type GetAllUserRequest struct{}

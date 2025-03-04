@@ -10,7 +10,7 @@ import (
 )
 
 // GetAllUsersRequestHandler Contains the dependencies of the Handler
-type GetAllUsersRequestHandler decorator.QueryHandler[dto.GetAllUserRequest, []dto.GetAllUsersResult]
+type GetAllUsersRequestHandler decorator.QueryHandler[dto.GetAllUsersResponse, []dto.GetAllUsersResponse]
 
 type getAllUsersRequestHandler struct {
 	repo user.Repository
@@ -19,7 +19,7 @@ type getAllUsersRequestHandler struct {
 // NewGetAllUsersRequestHandler Handler constructor
 func NewGetAllUsersRequestHandler(repo user.Repository, logger logger.Logger,
 	metricsClient decorator.MetricsClient) GetAllUsersRequestHandler {
-	return decorator.ApplyQueryDecorators[dto.GetAllUserRequest, []dto.GetAllUsersResult](
+	return decorator.ApplyQueryDecorators[dto.GetAllUsersResponse, []dto.GetAllUsersResponse](
 		getAllUsersRequestHandler{repo: repo},
 		logger,
 		metricsClient,
@@ -27,14 +27,14 @@ func NewGetAllUsersRequestHandler(repo user.Repository, logger logger.Logger,
 }
 
 // Handle Handles the query
-func (h getAllUsersRequestHandler) Handle(ctx context.Context, _ dto.GetAllUserRequest) ([]dto.GetAllUsersResult, error) {
+func (h getAllUsersRequestHandler) Handle(ctx context.Context, _ dto.GetAllUsersResponse) ([]dto.GetAllUsersResponse, error) {
 	res, err := h.repo.GetAll()
 	if err != nil {
 		return nil, err
 	}
-	var result []dto.GetAllUsersResult
+	var result []dto.GetAllUsersResponse
 	for _, modelUser := range res {
-		var userResult dto.GetAllUsersResult
+		var userResult dto.GetAllUsersResponse
 		err = utils.BindingStruct(modelUser, &userResult)
 		if err != nil {
 			return result, err

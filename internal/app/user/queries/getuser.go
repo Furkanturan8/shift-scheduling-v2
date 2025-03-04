@@ -9,7 +9,7 @@ import (
 	"shift-scheduling-V2/pkg/logger"
 )
 
-type GetUserRequestHandler decorator.QueryHandler[*dto.GetUserRequest, *dto.GetUserResult]
+type GetUserRequestHandler decorator.QueryHandler[*dto.GetUserRequest, *dto.GetUserResponse]
 
 type getUserRequestHandler struct {
 	repo user.Repository
@@ -20,7 +20,7 @@ func NewGetUserRequestHandler(
 	repo user.Repository,
 	logger logger.Logger,
 	metricsClient decorator.MetricsClient) GetUserRequestHandler {
-	return decorator.ApplyQueryDecorators[*dto.GetUserRequest, *dto.GetUserResult](
+	return decorator.ApplyQueryDecorators[*dto.GetUserRequest, *dto.GetUserResponse](
 		getUserRequestHandler{repo: repo},
 		logger,
 		metricsClient,
@@ -28,8 +28,8 @@ func NewGetUserRequestHandler(
 }
 
 // Handle Handlers the GetUserRequest query
-func (h getUserRequestHandler) Handle(ctx context.Context, query *dto.GetUserRequest) (*dto.GetUserResult, error) {
-	var result dto.GetUserResult
+func (h getUserRequestHandler) Handle(ctx context.Context, query *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+	var result dto.GetUserResponse
 
 	userData, err := h.repo.GetByID(query.UserID)
 	if err != nil {
