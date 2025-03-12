@@ -1,52 +1,86 @@
 package logger
 
 import (
-	"shift-scheduling-V2/config"
-
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"time"
 )
 
-// For mapping config logger to app logger levels
-var loggerLevelMap = map[string]zapcore.Level{
-	"debug":  zapcore.DebugLevel,
-	"info":   zapcore.InfoLevel,
-	"warn":   zapcore.WarnLevel,
-	"error":  zapcore.ErrorLevel,
-	"dpanic": zapcore.DPanicLevel,
-	"panic":  zapcore.PanicLevel,
-	"fatal":  zapcore.FatalLevel,
+type Logger struct {
+	infoLogger  *log.Logger
+	errorLogger *log.Logger
 }
 
-// Logger methods interface
-type Logger interface {
-	Gorm
-	InitLogger()
-	Debugf(template string, args ...interface{})
-	Infof(template string, args ...interface{})
-	Warnf(template string, args ...interface{})
-	Errorf(template string, args ...interface{})
-	DPanicf(template string, args ...interface{})
-	Panicf(template string, args ...interface{})
-	Fatalf(template string, args ...interface{})
-	WithFiled(field zapcore.Field) *zap.Logger
-}
+var defaultLogger *Logger
 
-// Logger
-type apiLogger struct {
-	cfg         *config.Configuration
-	sugarLogger *zap.SugaredLogger
-	logger      *zap.Logger
-}
-
-// App Logger constructor
-func NewApiLogger(cfg ...*config.Configuration) Logger {
-	apilg := &apiLogger{}
-	if len(cfg) == 0 {
-		apilg.DefaultInit()
-	} else {
-		apilg.cfg = cfg[0]
-		apilg.InitLogger()
+func Init(logDir string) error {
+	logger, err := NewLogger(logDir)
+	if err != nil {
+		return err
 	}
-	return apilg
+	defaultLogger = logger
+	return nil
+}
+
+func NewLogger(logDir string) (*Logger, error) {
+	// Log dizinini oluştur
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		return nil, fmt.Errorf("log dizini oluşturulamadı: %v", err)
+	}
+
+	currentTime := time.Now().Format("2006-01-02")
+
+	// Info log dosyası
+	infoLogFile, err := os.OpenFile(
+		filepath.Join(logDir, fmt.Sprintf("info_%s.log", currentTime)),
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0644,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("info log dosyası oluşturulamadı: %v", err)
+	}
+
+	// Error log dosyası
+	errorLogFile, err := os.OpenFile(
+		filepath.Join(logDir, fmt.Sprintf("error_%s.log", currentTime)),
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0644,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error log dosyası oluşturulamadı: %v", err)
+	}
+
+	return &Logger{
+		infoLogger:  log.New(infoLogFile, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile),
+		errorLogger: log.New(errorLogFile, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile),
+	}, nil
+}
+
+func (l *Logger) Info(format string, v ...interface{}) {
+	if l.infoLogger != nil {
+		l.infoLogger.Printf(format, v...)
+	}
+	log.Printf(format, v...) // Konsola da yazdır
+}
+
+func (l *Logger) Error(format string, v ...interface{}) {
+	if l.errorLogger != nil {
+		l.errorLogger.Printf(format, v...)
+	}
+	log.Printf("ERROR: "+format, v...) // Konsola da yazdır
+}
+
+// Global fonksiyonlar
+func Info(format string, v ...interface{}) {
+	if defaultLogger != nil {
+		defaultLogger.Info(format, v...)
+	}
+}
+
+func Error(format string, v ...interface{}) {
+	if defaultLogger != nil {
+		defaultLogger.Error(format, v...)
+	}
 }
