@@ -119,7 +119,7 @@ func CheckUserAuthorization(claims *Claims, requiredRole model.Role) error {
 	}
 
 	// Admin her şeye erişebilir
-	if claims.Role == model.AdminRole {
+	if claims.Role == model.UserRoleAdmin {
 		return nil
 	}
 

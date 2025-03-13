@@ -10,17 +10,19 @@ import (
 )
 
 type Router struct {
-	app         *fiber.App
-	authHandler *handler.AuthHandler
-	userHandler *handler.UserHandler
+	app           *fiber.App
+	authHandler   *handler.AuthHandler
+	userHandler   *handler.UserHandler
+	doctorHandler *handler.DoctorHandler
 	// Diğer handler'lar buraya eklenecek
 }
 
-func NewRouter(authHandler *handler.AuthHandler, userHandler *handler.UserHandler) *Router {
+func NewRouter(a *handler.AuthHandler, u *handler.UserHandler, d *handler.DoctorHandler) *Router {
 	return &Router{
-		app:         fiber.New(),
-		authHandler: authHandler,
-		userHandler: userHandler,
+		app:           fiber.New(),
+		authHandler:   a,
+		userHandler:   u,
+		doctorHandler: d,
 	}
 }
 
@@ -59,6 +61,20 @@ func (r *Router) SetupRoutes() {
 	adminUsers.Get("/:id", r.userHandler.GetByID)
 	adminUsers.Put("/:id", r.userHandler.Update)
 	adminUsers.Delete("/:id", r.userHandler.Delete)
+
+	// Doctor routes
+	doctors := v1.Group("/doctors")
+	adminDoctors := doctors.Group("/")
+	adminDoctors.Use(middleware.AuthMiddleware(), middleware.AdminOnly())
+	adminDoctors.Get("/", r.doctorHandler.List)
+	adminDoctors.Get("/:id", r.doctorHandler.GetByID)
+	adminDoctors.Post("/", r.doctorHandler.Create)
+	adminDoctors.Put("/:id", r.doctorHandler.Update)
+	adminDoctors.Delete("/:id", r.doctorHandler.Delete)
+	adminDoctors.Get("/location/:location_id", r.doctorHandler.GetDoctorsByLocation)
+	adminDoctors.Get("/:id/holidays", r.doctorHandler.GetDoctorHolidays)
+	adminDoctors.Get("/holidays/:location_id", r.doctorHandler.GetDoctorsHolidayByLocationId)
+	adminDoctors.Get("/:shift_id", r.doctorHandler.GetDoctorByShiftID)
 
 	// Diğer route grupları buraya eklenecek
 }

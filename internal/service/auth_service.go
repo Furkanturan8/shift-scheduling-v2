@@ -35,11 +35,11 @@ func (s *AuthService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 
 	// Yeni kullanıcı oluştur
 	user := &model.User{
-		Email:     req.Email,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Role:      model.UserRole,     // Varsayılan rol
-		Status:    model.StatusActive, // Varsayılan durum
+		Email:   req.Email,
+		Name:    req.FirstName,
+		Surname: req.LastName,
+		Role:    model.UserRoleNormal, // Varsayılan rol
+		Status:  model.StatusActive,   // Varsayılan durum
 	}
 
 	// Şifreyi hashle

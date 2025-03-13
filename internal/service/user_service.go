@@ -17,73 +17,49 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) List(ctx context.Context) (*dto.UsersResponse, error) {
+func (s *UserService) List(ctx context.Context) ([]dto.UserResponseDTO, error) {
 	users, err := s.userRepo.List(ctx)
 	if err != nil {
 		return nil, errorx.ErrDatabaseOperation
 	}
 
-	userResponses := make([]dto.UserResponse, len(users))
-	for i, user := range users {
-		userResponses[i] = dto.UserResponse{
-			ID:        user.ID,
-			Email:     user.Email,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Role:      string(user.Role),
-			Status:    string(user.Status),
-		}
+	var userList []dto.UserResponseDTO
+	for _, user := range users {
+		uDto := dto.UserResponseDTO{}.ToResponseModel(user)
+		userList = append(userList, uDto)
 	}
 
-	return &dto.UsersResponse{
-		Users: userResponses,
-		Total: int64(len(users)),
-	}, nil
+	return userList, nil
 }
 
-func (s *UserService) GetByID(ctx context.Context, id int64) (*dto.UserResponse, error) {
+func (s *UserService) GetByID(ctx context.Context, id int64) (dto.UserResponseDTO, error) {
 	user, err := s.userRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, errorx.ErrNotFound
+		return dto.UserResponseDTO{}, errorx.ErrNotFound
 	}
 
-	return &dto.UserResponse{
-		ID:        user.ID,
-		Email:     user.Email,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Role:      string(user.Role),
-		Status:    string(user.Status),
-	}, nil
+	return dto.UserResponseDTO{}.ToResponseModel(*user), nil
 }
 
-func (s *UserService) Update(ctx context.Context, id int64, req *dto.UpdateUserRequest) error {
+func (s *UserService) Update(ctx context.Context, id int64, req *dto.UserCreateDTO) error {
 	user, err := s.userRepo.GetByID(ctx, id)
 	if err != nil {
 		return errorx.ErrNotFound
 	}
 
-	if req.FirstName != "" {
-		user.FirstName = req.FirstName
-	}
-	if req.LastName != "" {
-		user.LastName = req.LastName
-	}
-	if req.Email != "" {
-		// Email değişiyorsa, yeni email'in başka bir kullanıcıda olmadığından emin ol
-		if req.Email != user.Email {
-			exists, err := s.userRepo.ExistsByEmail(ctx, req.Email)
-			if err != nil {
-				return errorx.ErrDatabaseOperation
-			}
-			if exists {
-				return errorx.ErrDuplicate
-			}
+	if user.Email != req.Email {
+		exists, err := s.userRepo.ExistsByEmail(ctx, req.Email)
+		if err != nil {
+			return errorx.ErrDatabaseOperation
 		}
-		user.Email = req.Email
+		if exists {
+			return errorx.ErrDuplicate
+		}
 	}
 
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	req.ToDBModel(*user)
+
+	if err = s.userRepo.Update(ctx, user); err != nil {
 		return errorx.ErrDatabaseOperation
 	}
 

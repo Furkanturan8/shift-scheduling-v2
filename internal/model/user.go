@@ -6,12 +6,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Role string
+type Role int
 type Status string
 
 const (
-	AdminRole Role = "admin"
-	UserRole  Role = "user"
+	UserRoleNormal Role = 1
+	UserRoleDoctor Role = 2
+	UserRoleAdmin  Role = 10
 )
 
 const (
@@ -21,21 +22,20 @@ const (
 )
 
 type User struct {
-	ID        int64     `json:"id" bun:",pk,autoincrement"`
+	BaseModel
 	Email     string    `json:"email" bun:",unique,notnull"`
+	Phone     string    `json:"phone" bun:",unique,notnull"`
 	Password  string    `json:"-" bun:"password_hash,notnull"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
+	Name      string    `json:"name" bun:"name"`
+	Surname   string    `json:"surname" bun:"surname"`
 	Role      Role      `json:"role" bun:"type:user_role,notnull,default:'user'"`
 	Status    Status    `json:"status" bun:"type:user_status,notnull,default:'active'"`
 	LastLogin time.Time `json:"last_login" bun:",nullzero"`
-	CreatedAt time.Time `json:"created_at" bun:",nullzero,notnull,default:current_timestamp"`
-	UpdatedAt time.Time `json:"updated_at" bun:",nullzero,notnull,default:current_timestamp"`
 
 	tableName struct{} `bun:"users"`
 }
 
-func (u *User) SetPassword(password string) error {
+func (u User) SetPassword(password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -44,11 +44,28 @@ func (u *User) SetPassword(password string) error {
 	return nil
 }
 
-func (u *User) CheckPassword(password string) bool {
+func (u User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	return err == nil
 }
 
-func (u *User) GetStatus() Status {
+func (u User) GetStatus() Status {
 	return u.Status
+}
+
+func (u User) String() string {
+	return u.Name + " " + u.Surname
+}
+
+func (r Role) String() string {
+	switch r {
+	case UserRoleNormal:
+		return "normal"
+	case UserRoleDoctor:
+		return "doctor"
+	case UserRoleAdmin:
+		return "admin"
+	default:
+		return "unknown"
+	}
 }

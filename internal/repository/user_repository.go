@@ -98,11 +98,11 @@ func (r *UserRepository) Delete(ctx context.Context, id int64) error {
 }
 
 func (r *UserRepository) UpdateLastLogin(ctx context.Context, id int64) error {
-	user := &model.User{ID: id}
+	var user model.User
 	_, err := r.db.NewUpdate().
 		Model(user).
 		Column("last_login").
-		WherePK().
+		Where("id=?", id).
 		Exec(ctx)
 
 	return err

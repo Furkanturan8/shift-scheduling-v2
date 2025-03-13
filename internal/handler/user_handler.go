@@ -46,7 +46,7 @@ func (h *UserHandler) Update(c *fiber.Ctx) error {
 		return errorx.ErrInvalidRequest
 	}
 
-	var req dto.UpdateUserRequest
+	var req dto.UserCreateDTO
 	if err = c.BodyParser(&req); err != nil {
 		return errorx.WithDetails(errorx.ErrInvalidRequest, "Geçersiz giriş formatı")
 	}
@@ -82,7 +82,7 @@ func (h *UserHandler) GetProfile(c *fiber.Ctx) error {
 func (h *UserHandler) UpdateProfile(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(int64)
 
-	var req dto.UpdateUserRequest
+	var req dto.UserCreateDTO
 	if err := c.BodyParser(&req); err != nil {
 		return errorx.WithDetails(errorx.ErrInvalidRequest, "Geçersiz giriş formatı")
 	}

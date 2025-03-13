@@ -45,7 +45,7 @@ func AdminOnly() fiber.Handler {
 			return errorx.WithDetails(errorx.ErrUnauthorized, "Yetkilendirme bilgisi bulunamadı")
 		}
 
-		if role.(model.Role) != model.AdminRole {
+		if role.(model.Role) != model.UserRoleAdmin {
 			return errorx.WithDetails(errorx.ErrForbidden, "Bu işlem için admin yetkisi gerekli")
 		}
 
