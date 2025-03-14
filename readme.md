@@ -19,7 +19,7 @@ Bu proje, hastanelerde çalışan doktorların nöbet planlamasının otomatik o
 - **Mobil Uygulama:** Flutter veya Kotlin
 - **Frontend (Opsiyonel):** Vue.js
 - **Veritabanı:** PostgreSQL
-- **Docker**
+- **Docker Ve Docker Compose**
 - **Redis (Cache)**
 
 ---

@@ -19,7 +19,7 @@ This project aims to automate the shift planning for hospital doctors, organize 
 - **Mobile Application:** Flutter or Kotlin
 - **Frontend (Optional):** Vue.js
 - **Database:** PostgreSQL
-- **Docker**
+- **Docker And Docker Compose**
 - **Redis (Cache)**
 ---
 
