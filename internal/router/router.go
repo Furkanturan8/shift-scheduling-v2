@@ -96,8 +96,6 @@ func (r *Router) SetupRoutes() {
 	adminShifts.Get("/shifts-status", r.shiftHandler.GetShiftsStatus)
 	adminShifts.Get("/shifts-locations", r.shiftHandler.GetShiftLocations)
 	adminShifts.Post("/", r.shiftHandler.Create)
-
-	// ... korumalı rotalar
 }
 
 func (r *Router) GetApp() *fiber.App {
