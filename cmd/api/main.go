@@ -63,19 +63,22 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	authRepo := repository.NewAuthRepository(db)
 	doctorRepo := repository.NewDoctorRepository(db)
+	shiftRepo := repository.NewShiftRepository(db)
 
 	// Service'ler
 	authService := service.NewAuthService(authRepo, userRepo)
 	userService := service.NewUserService(userRepo)
 	doctorService := service.NewDoctorService(doctorRepo, userRepo)
+	shiftService := service.NewShiftService(shiftRepo)
 
 	// Handler'lar
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
 	doctorHandler := handler.NewDoctorHandler(doctorService)
+	shiftHandler := handler.NewShiftHandler(shiftService)
 
 	// Router'ı oluştur ve yapılandır
-	r := router.NewRouter(authHandler, userHandler, doctorHandler)
+	r := router.NewRouter(authHandler, userHandler, doctorHandler, shiftHandler)
 	r.SetupRoutes()
 
 	// Graceful shutdown için kanal oluştur

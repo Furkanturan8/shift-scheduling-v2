@@ -14,10 +14,11 @@ type Router struct {
 	authHandler   *handler.AuthHandler
 	userHandler   *handler.UserHandler
 	doctorHandler *handler.DoctorHandler
+	shiftHandler  *handler.ShiftHandler
 	// Diğer handler'lar buraya eklenecek
 }
 
-func NewRouter(a *handler.AuthHandler, u *handler.UserHandler, d *handler.DoctorHandler) *Router {
+func NewRouter(a *handler.AuthHandler, u *handler.UserHandler, d *handler.DoctorHandler, s *handler.ShiftHandler) *Router {
 	return &Router{
 		app:           fiber.New(),
 		authHandler:   a,
@@ -75,6 +76,14 @@ func (r *Router) SetupRoutes() {
 	adminDoctors.Get("/:id/holidays", r.doctorHandler.GetDoctorHolidays)
 	adminDoctors.Get("/holidays/:location_id", r.doctorHandler.GetDoctorsHolidayByLocationId)
 	adminDoctors.Get("/:shift_id", r.doctorHandler.GetDoctorByShiftID)
+
+	// Shift routes
+	shifts := v1.Group("/shifts")
+	adminShifts := shifts.Group("/")
+	adminShifts.Use(middleware.AuthMiddleware(), middleware.AdminOnly())
+	//adminShifts.Get("/", r.shiftHandler.ListShifts)
+	//adminShifts.Get("/:id", r.shiftHandler.GetShiftByID)
+	adminShifts.Post("/", r.shiftHandler.Create)
 
 	// Diğer route grupları buraya eklenecek
 }
