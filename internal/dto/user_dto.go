@@ -26,13 +26,14 @@ func (vm UserCreateDTO) ToDBModel(m model.User) model.User {
 }
 
 type UserResponseDTO struct {
-	ID      int64  `json:"id"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Phone   string `json:"phone"`
-	Role    string `json:"role"`
-	Status  string `json:"active"`
+	ID       int64  `json:"id"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Username string `json:"username"`
+	Phone    string `json:"phone"`
+	Role     string `json:"role"`
+	Status   string `json:"active"`
 }
 
 func (vm UserResponseDTO) ToResponseModel(m model.User) UserResponseDTO {
@@ -40,6 +41,7 @@ func (vm UserResponseDTO) ToResponseModel(m model.User) UserResponseDTO {
 	vm.Email = m.Email
 	vm.Name = m.Name
 	vm.Surname = m.Surname
+	vm.Username = m.Username
 	vm.Phone = m.Phone
 	vm.Role = m.Role.String()
 	vm.Status = string(m.Status)

@@ -25,9 +25,10 @@ type User struct {
 	BaseModel
 	Email     string    `json:"email" bun:",unique,notnull"`
 	Phone     string    `json:"phone" bun:",unique,notnull"`
-	Password  string    `json:"-" bun:"password_hash,notnull"`
+	Password  string    `json:"-" bun:"password,notnull"`
 	Name      string    `json:"name" bun:"name"`
 	Surname   string    `json:"surname" bun:"surname"`
+	Username  string    `json:"username" bun:"username"`
 	Role      Role      `json:"role" bun:"type:user_role,notnull,default:'user'"`
 	Status    Status    `json:"status" bun:"type:user_status,notnull,default:'active'"`
 	LastLogin time.Time `json:"last_login" bun:",nullzero"`

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"shift-scheduling-v2/internal/dto"
 	"shift-scheduling-v2/internal/model"
 	"shift-scheduling-v2/internal/repository"
@@ -27,6 +28,7 @@ func (s *AuthService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 	// Email kontrolü
 	exists, err := s.userRepo.ExistsByEmail(ctx, req.Email)
 	if err != nil {
+		fmt.Println("err:", err)
 		return nil, errorx.ErrDatabaseOperation
 	}
 	if exists {
@@ -36,19 +38,22 @@ func (s *AuthService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 	// Yeni kullanıcı oluştur
 	user := &model.User{
 		Email:   req.Email,
-		Name:    req.FirstName,
-		Surname: req.LastName,
+		Name:    req.Name,
+		Surname: req.Surname,
 		Role:    model.UserRoleNormal, // Varsayılan rol
 		Status:  model.StatusActive,   // Varsayılan durum
 	}
 
 	// Şifreyi hashle
-	if err := user.SetPassword(req.Password); err != nil {
+	if err = user.SetPassword(req.Password); err != nil {
+		fmt.Println("err:", err)
 		return nil, errorx.ErrPasswordHash
 	}
 
 	// Kullanıcıyı kaydet
 	if err = s.userRepo.Create(ctx, user); err != nil {
+		fmt.Println("err:", err)
+
 		return nil, errorx.ErrDatabaseOperation
 	}
 

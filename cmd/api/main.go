@@ -75,7 +75,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
 	doctorHandler := handler.NewDoctorHandler(doctorService)
-	shiftHandler := handler.NewShiftHandler(shiftService)
+	shiftHandler := handler.NewShiftHandler(shiftService, doctorService)
 
 	// Router'ı oluştur ve yapılandır
 	r := router.NewRouter(authHandler, userHandler, doctorHandler, shiftHandler)

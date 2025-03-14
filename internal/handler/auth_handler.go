@@ -1,11 +1,13 @@
 package handler
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"fmt"
 	"shift-scheduling-v2/internal/dto"
 	"shift-scheduling-v2/internal/service"
 	"shift-scheduling-v2/pkg/errorx"
 	"shift-scheduling-v2/pkg/response"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type AuthHandler struct {
@@ -21,11 +23,6 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req dto.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
-		return errorx.ErrInvalidRequest
-	}
-
-	// Validasyon
-	if req.Email == "" || req.Password == "" || req.FirstName == "" || req.LastName == "" {
 		return errorx.ErrInvalidRequest
 	}
 
@@ -45,8 +42,11 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req dto.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
-		return errorx.ErrValidation
+		fmt.Printf("Parse error: %v\n", err)
+		return errorx.ErrInvalidRequest
 	}
+
+	fmt.Printf("Parsed request: %+v\n", req)
 
 	// Validasyon
 	if req.Email == "" || req.Password == "" {
