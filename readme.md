@@ -3,6 +3,10 @@
 ## 1. Proje Tanımı Ve Videosu
 Bu proje, hastanelerde çalışan doktorların nöbet planlamasının otomatik olarak yapılması, nöbetlerin doktorların müsaitlik durumlarına göre düzenlenmesi ve nöbet değişim taleplerinin kolayca yönetilebilmesini sağlamak için geliştirilecektir.
 
+### Proje Önizleme Videosu: <br>
+
+https://github.com/user-attachments/assets/6564f590-9d83-4d69-af4d-1db7b8ba2c56
+
 ## 2. Amaç ve Hedefler
 
 - Doktorların nöbet planlarını adil bir şekilde oluşturmak.
