@@ -25,27 +25,27 @@ func NewShiftHandler(s *service.ShiftService, d *service.DoctorService) *ShiftHa
 	return &ShiftHandler{shiftService: s, doctorService: d}
 }
 
-func (h ShiftHandler) Create(ctx *fiber.Ctx) error {
+func (h ShiftHandler) Create(c *fiber.Ctx) error {
 	var vm dto.ShiftCreateRequest
-	if err := ctx.BodyParser(&vm); err != nil {
+	if err := c.BodyParser(&vm); err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
 	shift := vm.ToDBModel(model.Shift{})
 
-	err := h.shiftService.CreateShift(ctx.Context(), shift)
+	err := h.shiftService.CreateShift(c.Context(), shift)
 	if err != nil {
 		return err
 	}
 
-	return response.Success(ctx, nil, "Shift created successfully")
+	return response.Success(c, nil, "Shift created successfully")
 }
 
-func (h ShiftHandler) AssignShiftsForMonth(ctx *fiber.Ctx, doctors []model.Doctor, locationID int, startOfMonth time.Time, endOfMonth time.Time) error {
+func (h ShiftHandler) AssignShiftsForMonth(c *fiber.Ctx, doctors []model.Doctor, locationID int, startOfMonth time.Time, endOfMonth time.Time) error {
 	// 1. Tüm doktorların tatil günlerini al
 	holidayMap := make(map[int64][]dto.DoctorHolidayDTO)
 	for _, doctor := range doctors {
-		holidays, err := h.doctorService.GetDoctorHolidays(ctx.Context(), doctor.ID)
+		holidays, err := h.doctorService.GetDoctorHolidays(c.Context(), doctor.ID)
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func (h ShiftHandler) AssignShiftsForMonth(ctx *fiber.Ctx, doctors []model.Docto
 			}
 
 			// Doktorun zaten o tarihte atanmış bir nöbeti olup olmadığını kontrol et
-			isAssigned, err := h.shiftService.IsDoctorAssignedToShift(ctx.Context(), doctor.ID, shiftDate)
+			isAssigned, err := h.shiftService.IsDoctorAssignedToShift(c.Context(), doctor.ID, shiftDate)
 			if err != nil {
 				return err
 			}
@@ -103,7 +103,7 @@ func (h ShiftHandler) AssignShiftsForMonth(ctx *fiber.Ctx, doctors []model.Docto
 			LocationID: int64(locationID),
 			ShiftDate:  shiftDate,
 		}
-		err := h.shiftService.CreateShift(ctx.Context(), shift)
+		err := h.shiftService.CreateShift(c.Context(), shift)
 		if err != nil {
 			return err
 		}
@@ -123,9 +123,9 @@ func (h ShiftHandler) AssignShiftsForMonth(ctx *fiber.Ctx, doctors []model.Docto
 	return nil
 }
 
-func (h ShiftHandler) AutoAssignShifts(ctx *fiber.Ctx) error {
+func (h ShiftHandler) AutoAssignShifts(c *fiber.Ctx) error {
 	var vm dto.AutoAssignShiftDTO
-	if err := ctx.BodyParser(&vm); err != nil {
+	if err := c.BodyParser(&vm); err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
@@ -134,7 +134,7 @@ func (h ShiftHandler) AutoAssignShifts(ctx *fiber.Ctx) error {
 	month := shift.Month
 	locationID := shift.LocationID
 
-	doctors, err := h.shiftService.GetDoctorsByLocation(ctx.Context(), locationID)
+	doctors, err := h.shiftService.GetDoctorsByLocation(c.Context(), locationID)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (h ShiftHandler) AutoAssignShifts(ctx *fiber.Ctx) error {
 		return errorx.ErrNotFound
 	}
 
-	shiftStatus, err := h.shiftService.GetShiftStatus(ctx.Context(), year, month, int(locationID))
+	shiftStatus, err := h.shiftService.GetShiftStatus(c.Context(), year, month, int(locationID))
 	if err != nil {
 		return err
 	}
@@ -154,22 +154,22 @@ func (h ShiftHandler) AutoAssignShifts(ctx *fiber.Ctx) error {
 	startOfMonth := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	endOfMonth := startOfMonth.AddDate(0, 1, 0)
 
-	err = h.shiftService.AssignShiftsForMonth(ctx.Context(), doctors, int(locationID), startOfMonth, endOfMonth)
+	err = h.shiftService.AssignShiftsForMonth(c.Context(), doctors, int(locationID), startOfMonth, endOfMonth)
 	if err != nil {
 		return err
 	}
 
-	err = h.shiftService.MarkShiftStatusAsDone(ctx.Context(), year, month, int(locationID))
+	err = h.shiftService.MarkShiftStatusAsDone(c.Context(), year, month, int(locationID))
 	if err != nil {
 		return err
 	}
 
-	return response.Success(ctx, nil, "Shifts assigned successfully")
+	return response.Success(c, nil, "Shifts assigned successfully")
 }
 
-func (h ShiftHandler) ResetShifts(ctx *fiber.Ctx) error {
+func (h ShiftHandler) ResetShifts(c *fiber.Ctx) error {
 	var vm dto.AutoAssignShiftDTO
-	if err := ctx.BodyParser(&vm); err != nil {
+	if err := c.BodyParser(&vm); err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
@@ -178,39 +178,39 @@ func (h ShiftHandler) ResetShifts(ctx *fiber.Ctx) error {
 	month := shift.Month
 	locationID := shift.LocationID
 
-	err := h.shiftService.ResetShiftsForMonth(ctx.Context(), year, month, int(locationID))
+	err := h.shiftService.ResetShiftsForMonth(c.Context(), year, month, int(locationID))
 	if err != nil {
 		return err
 	}
 
-	return response.Success(ctx, nil, "Shifts reset successfully")
+	return response.Success(c, nil, "Shifts reset successfully")
 }
 
-func (h ShiftHandler) GetShiftByDate(ctx *fiber.Ctx) error {
-	param := ctx.Params("date")
+func (h ShiftHandler) GetShiftByDate(c *fiber.Ctx) error {
+	param := c.Params("date")
 	date, err := time.Parse("2006-01-02", param)
 	if err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
-	shift, err := h.shiftService.GetShiftByDate(ctx.Context(), date)
+	shift, err := h.shiftService.GetShiftByDate(c.Context(), date)
 	if err != nil {
 		return err
 	}
 
 	shiftListVM := dto.ShiftResponse{}.ToResponseModel(*shift)
 
-	return response.Success(ctx, shiftListVM, "Shift retrieved successfully")
+	return response.Success(c, shiftListVM, "Shift retrieved successfully")
 }
 
-func (h ShiftHandler) GetTodayShifts(ctx *fiber.Ctx) error {
+func (h ShiftHandler) GetTodayShifts(c *fiber.Ctx) error {
 	loc, _ := time.LoadLocation("Europe/Istanbul")
 	now := time.Now().In(loc)
 
 	todayStr := fmt.Sprintf("%04d-%02d-%02d", now.Year(), now.Month(), now.Day())
 	today, _ := time.ParseInLocation("2006-01-02", todayStr, loc)
 
-	shifts, err := h.shiftService.GetTodayShifts(ctx.Context(), today)
+	shifts, err := h.shiftService.GetTodayShifts(c.Context(), today)
 	if err != nil {
 		return err
 	}
@@ -220,11 +220,11 @@ func (h ShiftHandler) GetTodayShifts(ctx *fiber.Ctx) error {
 		shiftListVM[i] = dto.ShiftListWithDetailsDTO{}.ToResponseModel(shift)
 	}
 
-	return response.Success(ctx, shiftListVM, "Today's shifts retrieved successfully")
+	return response.Success(c, shiftListVM, "Today's shifts retrieved successfully")
 }
 
-func (h ShiftHandler) GetAllShiftsWithDetails(ctx *fiber.Ctx) error {
-	shifts, err := h.shiftService.GetAllShiftsWithDetails(ctx.Context())
+func (h ShiftHandler) GetAllShiftsWithDetails(c *fiber.Ctx) error {
+	shifts, err := h.shiftService.GetAllShiftsWithDetails(c.Context())
 	if err != nil {
 		return errorx.ErrInternal
 	}
@@ -234,29 +234,29 @@ func (h ShiftHandler) GetAllShiftsWithDetails(ctx *fiber.Ctx) error {
 		shiftListVM[i] = dto.ShiftListWithDetailsDTO{}.ToResponseModel(shift)
 	}
 
-	return response.Success(ctx, shiftListVM, "All shifts with details retrieved successfully")
+	return response.Success(c, shiftListVM, "All shifts with details retrieved successfully")
 }
 
-func (h ShiftHandler) GetShiftsByLocationID(ctx *fiber.Ctx) error {
-	param := ctx.Params("location_id")
+func (h ShiftHandler) GetShiftsByLocationID(c *fiber.Ctx) error {
+	param := c.Params("location_id")
 	locationID, err := strconv.ParseInt(param, 10, 64)
 	if err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
-	query := ctx.Query("month")
+	query := c.Query("month")
 	month, err := strconv.ParseInt(query, 10, 64)
 	if err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
-	query2 := ctx.Query("year")
+	query2 := c.Query("year")
 	year, err := strconv.ParseInt(query2, 10, 64)
 	if err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
-	shifts, err := h.shiftService.GetShiftsByLocationID(ctx.Context(), locationID, month, year)
+	shifts, err := h.shiftService.GetShiftsByLocationID(c.Context(), locationID, month, year)
 	if err != nil {
 		return errorx.ErrInternal
 	}
@@ -266,11 +266,11 @@ func (h ShiftHandler) GetShiftsByLocationID(ctx *fiber.Ctx) error {
 		shiftListVM[i] = dto.ShiftListWithDetailsDTO{}.ToResponseModel(shift)
 	}
 
-	return response.Success(ctx, shiftListVM, "Shifts by location ID retrieved successfully")
+	return response.Success(c, shiftListVM, "Shifts by location ID retrieved successfully")
 }
 
-func (h ShiftHandler) GetAllShifts(ctx *fiber.Ctx) error {
-	shifts, err := h.shiftService.GetAllShift(ctx.Context())
+func (h ShiftHandler) GetAllShifts(c *fiber.Ctx) error {
+	shifts, err := h.shiftService.GetAllShift(c.Context())
 	if err != nil {
 		return errorx.ErrInternal
 	}
@@ -280,17 +280,17 @@ func (h ShiftHandler) GetAllShifts(ctx *fiber.Ctx) error {
 		shiftListVM[i] = dto.ShiftResponse{}.ToResponseModel(shift)
 	}
 
-	return response.Success(ctx, shiftListVM, "All shifts retrieved successfully")
+	return response.Success(c, shiftListVM, "All shifts retrieved successfully")
 }
 
-func (h ShiftHandler) GetByShiftID(ctx *fiber.Ctx) error {
-	param := ctx.Params("id")
+func (h ShiftHandler) GetByShiftID(c *fiber.Ctx) error {
+	param := c.Params("id")
 	id, err := strconv.ParseInt(param, 10, 64)
 	if err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
-	shift, err := h.shiftService.GetShiftByID(ctx.Context(), id)
+	shift, err := h.shiftService.GetShiftByID(c.Context(), id)
 	if err != nil {
 		if err.Error() == "record not found" {
 			return errorx.ErrNotFound
@@ -300,61 +300,61 @@ func (h ShiftHandler) GetByShiftID(ctx *fiber.Ctx) error {
 
 	shiftListVM := dto.ShiftResponse{}.ToResponseModel(*shift)
 
-	return response.Success(ctx, shiftListVM, "Shift retrieved successfully")
+	return response.Success(c, shiftListVM, "Shift retrieved successfully")
 }
 
-func (h ShiftHandler) DeleteShift(ctx *fiber.Ctx) error {
-	param := ctx.Params("id")
+func (h ShiftHandler) DeleteShift(c *fiber.Ctx) error {
+	param := c.Params("id")
 	id, err := strconv.ParseInt(param, 10, 64)
 	if err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
-	err = h.shiftService.DeleteShift(ctx.Context(), id)
+	err = h.shiftService.DeleteShift(c.Context(), id)
 	if err != nil {
 		return errorx.ErrInternal
 	}
 
-	return response.Success(ctx, nil, "Shift deleted successfully")
+	return response.Success(c, nil, "Shift deleted successfully")
 }
 
-func (h ShiftHandler) UpdateShift(ctx *fiber.Ctx) error {
-	param := ctx.Params("id")
+func (h ShiftHandler) UpdateShift(c *fiber.Ctx) error {
+	param := c.Params("id")
 	id, err := strconv.ParseInt(param, 10, 64)
 	if err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
-	m, err := h.shiftService.GetShiftByID(ctx.Context(), id)
+	m, err := h.shiftService.GetShiftByID(c.Context(), id)
 	if err != nil {
 		return err
 	}
 
 	var vm dto.ShiftCreateRequest
-	if err := ctx.BodyParser(&vm); err != nil {
+	if err := c.BodyParser(&vm); err != nil {
 		return errorx.ErrInvalidRequest
 	}
 
 	updatedShift := vm.ToDBModel(*m)
-	err = h.shiftService.UpdateShift(ctx.Context(), updatedShift)
+	err = h.shiftService.UpdateShift(c.Context(), updatedShift)
 	if err != nil {
 		return err
 	}
 
-	return response.Success(ctx, nil, "Shift updated successfully")
+	return response.Success(c, nil, "Shift updated successfully")
 }
 
-func (h ShiftHandler) GetShiftsStatus(ctx *fiber.Ctx) error {
-	shiftsStatus, err := h.shiftService.GetShiftsStatus(ctx.Context())
+func (h ShiftHandler) GetShiftsStatus(c *fiber.Ctx) error {
+	shiftsStatus, err := h.shiftService.GetShiftsStatus(c.Context())
 	if err != nil {
 		return errorx.ErrInternal
 	}
 
-	return response.Success(ctx, shiftsStatus, "Shifts status retrieved successfully")
+	return response.Success(c, shiftsStatus, "Shifts status retrieved successfully")
 }
 
-func (h ShiftHandler) GetShiftLocations(ctx *fiber.Ctx) error {
-	shiftLocations, err := h.shiftService.GetShiftLocations(ctx.Context())
+func (h ShiftHandler) GetShiftLocations(c *fiber.Ctx) error {
+	shiftLocations, err := h.shiftService.GetShiftLocations(c.Context())
 	if err != nil {
 		return errorx.ErrInternal
 	}
@@ -364,5 +364,5 @@ func (h ShiftHandler) GetShiftLocations(ctx *fiber.Ctx) error {
 		shiftLocationsVM[i] = dto.ShiftLocationDTO{}.ToResponseModel(location)
 	}
 
-	return response.Success(ctx, shiftLocationsVM, "Shift locations retrieved successfully")
+	return response.Success(c, shiftLocationsVM, "Shift locations retrieved successfully")
 }
